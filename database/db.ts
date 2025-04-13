@@ -11,10 +11,21 @@ export const createTables = async () => {
     tipo TEXT,
     valor TEXT
   );`);
+
+  await db.execAsync(`CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    password TEXT NOT NULL
+  );`);
 };
 
-
-
+export const insertarUsuario = async (email: string, password: string) => {
+    const db = await dbPromise;
+    await db.runAsync(
+      'INSERT INTO usuarios (email, password) VALUES (?, ?);',
+      email, password
+    );
+  };
 
 //Insertar sensor usando await
 export const insertSensor = async (sala: string, tipo: string, valor: string) => {

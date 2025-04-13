@@ -1,13 +1,28 @@
-import { View, Text, TextInput, Pressable, StyleSheet, Image } from 'react-native';
-import { useState } from 'react';
+import { View, Text, TextInput, Pressable, StyleSheet, Image, Alert } from 'react-native';
+import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
+import { createTables, insertarUsuario } from '../database/db'; // Ajusta la ruta si es diferente
 
 export default function Login() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const login = () => {
-    if (email.trim() !== '') {
-      router.replace('/login'); // Ir a la pantalla principal
+  useEffect(() => {
+    createTables(); // Crea las tablas al cargar
+  }, []);
+
+  const login = async () => {
+    if (email.trim() === '' || password.trim() === '') {
+      Alert.alert('Error', 'Ingresa correo y contraseña');
+      return;
+    }
+
+    try {
+      await insertarUsuario(email, password);
+      router.replace('/login'); // Ajusta la ruta a tu pantalla principal
+    } catch (error) {
+      Alert.alert('Error al guardar usuario');
+      console.error(error);
     }
   };
 
@@ -19,7 +34,7 @@ export default function Login() {
       />
 
       <Text style={styles.title}>Ingreso al Laboratorio</Text>
-      <Text style={styles.subtitle}>Por favor ingresa tu correo para continuar</Text>
+      <Text style={styles.subtitle}>Por favor ingresa tus datos para continuar</Text>
 
       <TextInput
         placeholder="ejemplo@correo.com"
@@ -27,6 +42,14 @@ export default function Login() {
         onChangeText={setEmail}
         style={styles.input}
         keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput
+        placeholder="Contraseña"
+        value={password}
+        onChangeText={setPassword}
+        style={styles.input}
+        secureTextEntry
       />
 
       <Pressable style={styles.button} onPress={login}>
@@ -37,54 +60,23 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#e6f4f1',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 30,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#05595b',
-    marginTop: 10,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 25,
-    textAlign: 'center',
-  },
+  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#f5f5f5' },
+  image: { width: 100, height: 100, alignSelf: 'center', marginBottom: 20 },
+  title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center' },
+  subtitle: { fontSize: 16, textAlign: 'center', marginBottom: 20 },
   input: {
-    backgroundColor: '#fff',
-    width: '100%',
-    padding: 15,
+    backgroundColor: 'white',
+    padding: 12,
     borderRadius: 10,
-    marginBottom: 20,
-    borderColor: '#aacfcf',
+    marginBottom: 15,
     borderWidth: 1,
+    borderColor: '#ccc'
   },
   button: {
-    backgroundColor: '#3fb984',
-    paddingVertical: 15,
-    paddingHorizontal: 50,
+    backgroundColor: '#008080',
+    padding: 15,
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    alignItems: 'center'
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  image: {
-    width: 100,
-    height: 100,
-    marginBottom: 10,
-  },
+  buttonText: { color: 'white', fontWeight: 'bold' }
 });
